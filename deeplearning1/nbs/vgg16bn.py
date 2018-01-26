@@ -106,7 +106,7 @@ class Vgg16BN():
         self.compile()
 
     def finetune(self, batches):
-        self.ft(batches.nb_class)
+        self.ft(batches.num_classes)
 
         classes = list(iter(batches.class_indices))
         for c in batches.class_indices:
@@ -119,17 +119,16 @@ class Vgg16BN():
                 loss='categorical_crossentropy', metrics=['accuracy'])
 
 
-    def fit_data(self, trn, labels,  val, val_labels,  nb_epoch=1, batch_size=64):
-        self.model.fit(trn, labels, nb_epoch=nb_epoch,
+    def fit_data(self, trn, labels,  val, val_labels,  epochs=1, batch_size=64):
+        self.model.fit(trn, labels, epochs=epochs,
                 validation_data=(val, val_labels), batch_size=batch_size)
 
 
-    def fit(self, batches, val_batches, nb_epoch=1):
-        self.model.fit_generator(batches, samples_per_epoch=batches.nb_sample, nb_epoch=nb_epoch,
-                validation_data=val_batches, nb_val_samples=val_batches.nb_sample)
+    def fit(self, batches, val_batches, epochs=1):
+        self.model.fit_generator(batches, steps_per_epoch=batches.samples//batches.batch_size, epochs=epochs, validation_steps=val_batches.samples//val_batches.batch_size)
 
 
     def test(self, path, batch_size=8):
         test_batches = self.get_batches(path, shuffle=False, batch_size=batch_size, class_mode=None)
-        return test_batches, self.model.predict_generator(test_batches, test_batches.nb_sample)
+        return test_batches, self.model.predict_generator(test_batches, test_batches.samples//test_batches.batch_size)
 
